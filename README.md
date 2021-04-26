@@ -1,7 +1,7 @@
 # hackchinese-chrome-extension
 A chrome extension for hackchinese.com
 
-# Installation:
+# Installation
 1. Download the hackchinese.crx file
 2. Go to: chrome://extensions/
 3. Make sure you have developer mode enabled
