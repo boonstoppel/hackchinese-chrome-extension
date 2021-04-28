@@ -10,8 +10,8 @@ A chrome extension for hackchinese.com
 
 
 # Usage
-Press "w" (for write) to see stroke animation of each character.
-Press "p" (for pinyin) to translate the example sentence to pinyin.
+- Press "w" (for write) to see stroke animation of each character
+- Press "p" (for pinyin) to translate the example sentence to pinyin
 
 # known issues
 The script can only animate characters of preloaded cards. All cards that need to be fetched after the study page has been loaded will not be animated for now.
