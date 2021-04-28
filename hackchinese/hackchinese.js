@@ -17,15 +17,64 @@ function initCard() {
   });
 }
 
+function getPinyin() {
+  var elemChinese = $('.card:visible .ss-sentence-chinese');
+  var elemEnglish = $('.card:visible .ss-sentence-english');
+
+  if (elemChinese.attr('data-loading-pinyin')) {
+    return;
+  }
+
+  if (elemChinese.attr('data-has-pinyin')) {
+    togglePinyin();
+    return;
+  }
+
+  elemChinese.attr('data-loading-pinyin', 1);
+
+  var sentence = elemChinese.html();
+  if (!sentence) {
+    return;
+  }
+
+  sentence = sentence.replace(/<\/?[^>]+(>|$)/g, '');
+  $.get('https://helloacm.com/api/pinyin/?s=' + sentence, function(data) {
+    elemChinese.attr('data-loading-pinyin', null);
+    elemChinese.attr('data-has-pinyin', 1);
+    elemEnglish.after('<div class="font-light ss-sentence-pinyin">' + parsePinYin(data) + '</div>');
+    elemEnglish.hide();
+  });
+}
+
+function parsePinYin(data) {
+  var str = '';
+  for (var i = 0; i < data.result.length; i++) {
+    str += (' ' + data.result[i].split(',')[0]);
+  }
+
+  return str;
+}
+
+function togglePinyin() {
+  var elemEnglish = $('.card:visible .ss-sentence-english');
+  var elemPinyin = $('.card:visible .ss-sentence-pinyin');
+
+  if (elemEnglish.is(":visible")) {
+    elemEnglish.hide();
+    elemPinyin.show();
+  } else {
+    elemEnglish.show();
+    elemPinyin.hide();
+  }
+}
+
 function initCharacter(index, hanziCharacter, cardId) {
   var character = $(hanziCharacter).html();
-
   if (character == '…') {
     return;
   }
 
   var elemId = 'hanzi-character-' + cardId + '-' + index;
-
   $(hanziCharacter).html('').attr('id', elemId);
 
   charactersByCard[cardId].push(HanziWriter.create(elemId, character, {
@@ -126,6 +175,10 @@ function keyHandler(event) {
     if (highlightRadicalsLoopCounter[cardId] == 0) {
       highlightRadicalsLoop(cardId);
     }
+  }
+
+  if (event.which == 80) {
+    getPinyin();
   }
 }
 
