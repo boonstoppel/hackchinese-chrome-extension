@@ -1,0 +1,30 @@
+{
+    // Comments are accepted in the manifest, even though it is JSON.
+    "manifest_version": 3,
+    "name": "Hackchinese Extension",
+    "description": "A chrome extension for hackchinese.com",
+    "version": "0.0.1",
+    "icons": {
+        "16": "logo/logo-16.png",
+        "48": "logo/logo-48.png",
+        "128": "logo/logo-128.png"
+    },
+    "permissions": [
+        "storage", 
+        "activeTab", 
+        "scripting", 
+        "tabs"
+    ],
+    "host_permissions": [
+        "https://www.hackchinese.com/study"
+    ],
+    "content_scripts": [{
+        "js": [
+            "js/hanzi-writer.min.js",
+            "hackchinese.js"
+        ],
+        "matches": [
+            "https://www.hackchinese.com/study"
+        ]
+    }]
+}
