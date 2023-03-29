@@ -1,4 +1,4 @@
-const translationUrl = 'https://helloacm.com/api/pinyin/?cached&s=';
+const translationUrl = 'https://helloacm.com/api/pinyin/?cached&t=1&s=';
 
 const writeCard = () => {
 	writeHanzi();
@@ -30,6 +30,21 @@ const writeHanzi = () => {
 	}
 }
 
+const parsePinyinData = (data) => {
+	var newData = [];
+
+	for (let i = 0; i < data.length; i++) {
+		newData.push(pinyinify(data[i])
+			.replace(/ /g, '')
+			.replace(/，/g, ','));
+	}
+
+	return newData.join(' ')
+		.replaceAll(' ,', ', ')
+		.replaceAll(',', ', ')
+		.replace(' 。', '')
+}
+
 const writePinyin = () => {
 	var elem = document.getElementsByClassName('ss-sentence-character')[0];
 	
@@ -38,13 +53,10 @@ const writePinyin = () => {
 	}
 
 	elem.done = true;
-
 	var hanzi = stripHtml(elem.innerHTML);
+
 	httpGet(translationUrl + hanzi, (data) => {
-		elem.innerHTML = '';
-		for (var i = 0; i < data.length; i++) {
-			elem.innerHTML += (' ' + data[i]);
-		}
+		elem.innerHTML = parsePinyinData(data);
 
 		setTimeout(() => {
 			document.getElementsByClassName('ss-sentence-character')[0].done = false;

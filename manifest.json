@@ -21,10 +21,15 @@
     "content_scripts": [{
         "js": [
             "js/hanzi-writer.min.js",
+            "js/pinyinify.js",
             "hackchinese.js"
         ],
         "matches": [
             "https://www.hackchinese.com/study"
         ]
-    }]
+    }],
+    "action": {
+        "default_title": "hackchinese.com",
+        "default_popup": "popup/popup.html"
+    }
 }
