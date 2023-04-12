@@ -1,8 +1,11 @@
 const translationUrl = 'https://helloacm.com/api/pinyin/?cached&t=1&s=';
 
-const writeCard = () => {
-	writeHanzi();
-	writePinyin();
+const addPinyinKeyListener = () => {
+	document.addEventListener('keypress', (event) => {
+	 	if ( event.code == 'KeyP') {
+	 		togglePinyin();
+	 	}
+	}, false);
 }
 
 const stripHtml = (str) => {
@@ -45,25 +48,35 @@ const parsePinyinData = (data) => {
 		.replace(' 。', '')
 }
 
-const writePinyin = () => {
+const togglePinyin = () => {
 	var elem = document.getElementsByClassName('ss-sentence-character')[0];
 	
-	if (!elem || elem.done) {
+	if (!elem) {
 		return;
 	}
 
-	elem.done = true;
-	var hanzi = stripHtml(elem.innerHTML);
-
-	httpGet(translationUrl + hanzi, (data) => {
-		elem.innerHTML = parsePinyinData(data);
-
-		setTimeout(() => {
-			document.getElementsByClassName('ss-sentence-character')[0].done = false;
-		}, 1000);
-	});
+	if (elem.hasPinyin) {
+		revertPinyin(elem);
+	} else {
+		writePinyin(elem);
+	}
 }
 
+const revertPinyin = (elem) => {
+	elem.innerHTML = elem.oldData;
+	elem.hasPinyin = false;
+	elem.oldData = null;
+}
+
+const writePinyin = (elem) => {
+	elem.oldData = elem.innerHTML;
+
+	httpGet(translationUrl + stripHtml(elem.innerHTML), (data) => {
+		elem.innerHTML = parsePinyinData(data);
+	});
+
+	elem.hasPinyin = true;
+}
 
 const httpGet = (url, callback) => {
 	fetch(url, { method: 'GET' })
@@ -81,7 +94,7 @@ const setupObserver = () => {
 	const observer = new MutationObserver((mutationsList) => {
 	    for (var mutation of mutationsList) {
 	    	if (mutation.type === 'childList') {
-	        	writeCard();
+	        	writeHanzi();
 	    	}
 	    }
 	});
@@ -98,5 +111,6 @@ const setupObserver = () => {
 
 setTimeout(() => {
 	setupObserver();
-	writeCard();
+	writeHanzi();
+	addPinyinKeyListener();
 }, 100)
