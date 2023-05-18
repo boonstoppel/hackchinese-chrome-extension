@@ -1,4 +1,5 @@
 const translationUrl = 'https://helloacm.com/api/pinyin/?cached&t=1&s='
+const pinyinCache = {};
 
 const addPinyinKeyListener = () => {
 	document.addEventListener('keypress', (event) => {
@@ -8,12 +9,28 @@ const addPinyinKeyListener = () => {
 	}, false)
 }
 
+const byId = (id) => {
+	return document.getElementById(id)
+}
+
+const byClass = (className, elem) => {
+	if (!elem) {
+		elem = window.document
+	}
+
+	return elem.getElementsByClassName(className)
+}
+
+const firstByClass = (className, elem) => {
+	return byClass(className, elem)[0]
+}
+
 const stripHtml = (str) => {
 	return str.replace(/<\/?[^>]+(>|$)/g, '')
 }
 
 const writeHanzi = () => {
-	var chars = document.getElementsByClassName('ss-character')
+	var chars = byClass('ss-character')
 
 	if (!chars.length || chars[0].innerHTML.length != 1) {
 		return
@@ -31,6 +48,8 @@ const writeHanzi = () => {
 			 strokeColor: '#000'
 		})
 	}
+
+	firstByClass('ss-sentence-character').oldData = null
 }
 
 const parsePinyinData = (data) => {
@@ -49,13 +68,13 @@ const parsePinyinData = (data) => {
 }
 
 const togglePinyin = () => {
-	var elem = document.getElementsByClassName('ss-sentence-character')[0]
+	var elem = firstByClass('ss-sentence-character')
 	
-	if (!elem) {
+	if (!elem || elem.parentNode.classList.contains('opacity-0')) {
 		return
 	}
 
-	if (elem.hasPinyin) {
+	if (elem.oldData) {
 		revertPinyin(elem)
 	} else {
 		writePinyin(elem)
@@ -63,18 +82,20 @@ const togglePinyin = () => {
 }
 
 const playAudio = () => {
-	var elem = document.getElementsByClassName('ss-pinyin')[0]
+	var elem = firstByClass('ss-pinyin')
 	
 	if (!elem) {
 		return
 	}
 
-	document.getElementById('replay-buttons').getElementsByClassName('cursor-pointer')[0].click()
+	firstByClass('cursor-pointer', byId('replay-buttons')).click()
 }
 
 const revertPinyin = (elem) => {
-	elem.innerHTML = elem.oldData
-	elem.hasPinyin = false
+	if (elem.oldData) {
+		elem.innerHTML = elem.oldData
+	}
+
 	elem.oldData = null
 }
 
@@ -84,14 +105,17 @@ const writePinyin = (elem) => {
 	httpGet(translationUrl + stripHtml(elem.innerHTML), (data) => {
 		elem.innerHTML = parsePinyinData(data)
 	})
-
-	elem.hasPinyin = true
 }
 
 const httpGet = (url, callback) => {
+	if (pinyinCache[url]) {
+		return callback(pinyinCache[url]);
+	}
+
 	fetch(url, { method: 'GET' })
 		.then(Result => Result.json())
 	    .then(data => {
+	    	pinyinCache[url] = data['result']
 			callback(data['result'])
 	    })
 	    .catch(errorMsg => {
@@ -109,7 +133,7 @@ const setupObserver = () => {
 	    }
 	})
 
-	const characterNodes = document.getElementById('face-container').getElementsByClassName('ss-character')
+	const characterNodes = byClass('ss-character', byId('face-container'))
 	for (let i = 0; i < characterNodes.length; i++) {
 		characterObserver.observe(characterNodes[i], {
 			childList: true
@@ -117,14 +141,14 @@ const setupObserver = () => {
 	}
 
 	const pinyinObserver = new MutationObserver((mutationsList) => {
-		let elem = document.getElementById('face-container').getElementsByClassName('ss-pinyin')[0]
+		let elem = firstByClass('ss-pinyin', byId('face-container'))
 
 		if (elem && elem.classList.contains('opacity-100')) {
 			playAudio()
 		}
 	})
 
-	const pinyinNodes = document.getElementById('face-container').getElementsByClassName('ss-pinyin')
+	const pinyinNodes = byClass('ss-pinyin', byId('face-container'))
 	for (let i = 0; i < pinyinNodes.length; i++) {
 		pinyinObserver.observe(pinyinNodes[i], {
 			attributes: true
