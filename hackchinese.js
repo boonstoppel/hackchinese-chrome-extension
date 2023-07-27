@@ -26,7 +26,7 @@ const firstByClass = (className, elem) => {
 }
 
 const stripHtml = (str) => {
-	return str.replace(/<\/?[^>]+(>|$)/g, '')
+	return str.replace(/<\/?[^>]+(>|$)/g, '').replace('。', '')
 }
 
 const writeHanzi = () => {
@@ -49,14 +49,19 @@ const writeHanzi = () => {
 		})
 	}
 
-	firstByClass('ss-sentence-character').oldData = null
+	var elem = firstByClass('ss-sentence-character')
+
+	if (elem) {
+		elem.oldData = null
+	}
 }
 
 const parsePinyinData = (data) => {
 	var newData = []
 
 	for (let i = 0; i < data.length; i++) {
-		newData.push(pinyinify(data[i])
+		let chars = data[i].split(',')
+		newData.push(pinyinify(chars[0])
 			.replace(/ /g, '')
 			.replace(/，/g, ','))
 	}
@@ -64,7 +69,7 @@ const parsePinyinData = (data) => {
 	return newData.join(' ')
 		.replaceAll(' ,', ', ')
 		.replaceAll(',', ', ')
-		.replace(' 。', '')
+		.replace(' 。', '.')
 }
 
 const togglePinyin = () => {
